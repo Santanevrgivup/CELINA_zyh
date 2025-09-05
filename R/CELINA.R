@@ -610,7 +610,7 @@ Testing_interaction_all <- function(object, kernel_mat = NULL,
   # triggerd if the input ST data was single-cell-resolution, since after filtering some rare celltypes, 
   # the proportion_mat maybe all zero in some cols representing single cells and further causing Nan error.
 
-  # Here we make a compulsory correction of Nan to zero for test
+  # Here we make a compulsory correction of Nan to zero for test, 17:33, Sep.5, 2025.
   celltype_mat[is.na(celltype_mat)] <- 0
   
   object@celltype_mat <- t(celltype_mat)
