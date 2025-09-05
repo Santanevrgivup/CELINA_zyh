@@ -606,7 +606,13 @@ Testing_interaction_all <- function(object, kernel_mat = NULL,
   
   ## Subset the cell type proportion matrix for remaining cell types
   celltype_mat <- t(object@celltype_mat[names(object@genes_list), ])
-  celltype_mat <- sweep(celltype_mat, 1, rowSums(celltype_mat), "/")
+  celltype_mat <- sweep(celltype_mat, 1, rowSums(celltype_mat), "/")# Here may be a bug that would be 
+  # triggerd if the input ST data was single-cell-resolution, since after filtering some rare celltypes, 
+  # the proportion_mat maybe all zero in some cols representing single cells and further causing Nan error.
+
+  # Here we make a compulsory correction of Nan to zero for test
+  celltype_mat[is.na(celltype_mat)] <- 0
+  
   object@celltype_mat <- t(celltype_mat)
 
   ## Remove the cells from the cell types that have been filtered out for single cell resolution
