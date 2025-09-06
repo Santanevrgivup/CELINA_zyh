@@ -610,13 +610,9 @@ Testing_interaction_all <- function(object, kernel_mat = NULL,
   # triggerd if the input ST data was single-cell-resolution, since after filtering some rare celltypes, 
   # the proportion_mat maybe all zero in some cols representing single cells and further causing Nan error.
 
-  # Here we make a compulsory correction of Nan to zero for test, 17:33, Sep.5, 2025.
-  celltype_mat[is.na(celltype_mat)] <- 0
   
   object@celltype_mat <- t(celltype_mat)
 
-  ## Remove the cells from the cell types that have been filtered out for single cell resolution
-  
   if (is.null(celltype_to_test)) {
     celltype_to_test <- rownames(object@celltype_mat)
   }
@@ -641,7 +637,7 @@ Testing_interaction_all <- function(object, kernel_mat = NULL,
       ## Run the default 11 kernels algorithm
       pvalues_results <- pbmcapply::pbmclapply(1:nrow(combinations), 
                            function(i) {Testing_interaction_multi_kernels(target_normalized_counts[combinations[i, 2], ],
-                                                                          object@celltype_mat[combinations[i, 1], ],
+                                                                          object@celltype_mat[combinations[i, 1], ][names(target_normalized_counts[combinations[i, 2], ])], # 21:01,0906, 2025, yhzhao
                                                                           covariates = object@covariates, kernel_mat = object@kernelmat)},  
                            mc.cores = num_cores)
       
