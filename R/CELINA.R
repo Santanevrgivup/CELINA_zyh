@@ -638,7 +638,7 @@ Testing_interaction_all <- function(object, kernel_mat = NULL,
       pvalues_results <- pbmcapply::pbmclapply(1:nrow(combinations), 
                            function(i) {Testing_interaction_multi_kernels(target_normalized_counts[combinations[i, 2], ],
                                                                           object@celltype_mat[combinations[i, 1], ][names(target_normalized_counts[combinations[i, 2], ])], # 21:01,0906, 2025, yhzhao, align the y, x, covarients and kernel matrix 
-                                                                          covariates = object@covariates[names(target_normalized_counts[combinations[i, 2], ])], kernel_mat = object@kernelmat[names(target_normalized_counts[combinations[i, 2], names(target_normalized_counts[combinations[i, 2]])])},  
+                                                                          covariates = object@covariates[names(target_normalized_counts[combinations[i, 2], ]), ], kernel_mat = object@kernelmat[names(target_normalized_counts[combinations[i, 2], ]), names(target_normalized_counts[combinations[i, 2], ])])},  
                            mc.cores = num_cores)
       
       pvalues_results <- as.data.frame(do.call(rbind, pvalues_results))
