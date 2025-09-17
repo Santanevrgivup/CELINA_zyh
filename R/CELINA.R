@@ -617,6 +617,8 @@ Testing_interaction_all <- function(object, kernel_mat = NULL,
   
   ## Regress cell type information for each target cell type
   for (each_celltype in celltype_to_test) {
+  message(">>> Start processing cell type: ", each_celltype)
+  tryCatch({
     ## Extract the gene expression matrix using selected gene list
     target_normalized_counts <- object@gene_expression_mat[object@genes_list[[each_celltype]], , drop = F]
     
@@ -629,36 +631,35 @@ Testing_interaction_all <- function(object, kernel_mat = NULL,
     ## Construct the combination pairs
     gene_names <- rownames(target_normalized_counts)
     combinations <- expand.grid(each_celltype, gene_names, stringsAsFactors = F)
-
+    
     ## Run different algorithms based on the approximation
     if (object@approximation == FALSE) {
-      ## Run the default 11 kernels algorithm
-      pvalues_results <- pbmcapply::pbmclapply(1:nrow(combinations), 
-                           function(i) {Testing_interaction_multi_kernels(target_normalized_counts[combinations[i, 2], ],
-                                                                          object@celltype_mat[combinations[i, 1], ],
-                                                                          covariates = object@covariates, kernel_mat = object@kernelmat)},  
-                           mc.cores = num_cores)
-      
-      pvalues_results <- as.data.frame(do.call(rbind, pvalues_results))
-      rownames(pvalues_results) <- gene_names
-      object@result[[each_celltype]] <- pvalues_results
-      rm(pvalues_results)
-    } else {
-      ## Run the alternative 1 kernel approximation algorithm
-      ## Run the Testing_interaction paralleled for each pair
-      ## Add in the covariates version
-      pvalues_results <- pbmcapply::pbmclapply(1:nrow(combinations), 
-                                               function(i) {Testing_interaction(target_normalized_counts[combinations[i, 2], ],
-                                                                                object@celltype_mat[combinations[i, 1], ],
-                                                                                covariates = object@covariates, kernelmat_approx_U = object@kernelmat_approx_U)},  
-                                               mc.cores = num_cores)
+      message("Running kernel tests for ", each_celltype)
+      pvalues_results <- pbmcapply::pbmclapply(
+        1:nrow(combinations), 
+        function(i) {
+          Testing_interaction_multi_kernels(
+            target_normalized_counts[combinations[i, 2], ],
+            object@celltype_mat[combinations[i, 1], ],
+            covariates = object@covariates,
+            kernel_mat = object@kernelmat
+          )
+        }, mc.cores = num_cores
+      )
       
       pvalues_results <- as.data.frame(do.call(rbind, pvalues_results))
       rownames(pvalues_results) <- gene_names
       object@result[[each_celltype]] <- pvalues_results
       rm(pvalues_results)
     }
-  }
+    
+    message(">>> Finished cell type: ", each_celltype)
+    
+  }, error = function(e) {
+    message("!!! Error in cell type: ", each_celltype)
+    message("Error details: ", e$message)
+  })
+}
 
   return(object)
 }
