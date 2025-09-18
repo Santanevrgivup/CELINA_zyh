@@ -617,8 +617,8 @@ Testing_interaction_all <- function(object, kernel_mat = NULL,
   
   ## Regress cell type information for each target cell type
   for (each_celltype in celltype_to_test) {
-  message(">>> Start processing cell type: ", each_celltype)
-  tryCatch({
+  message(">>> Start testing cell type: ", each_celltype)
+  
     ## Extract the gene expression matrix using selected gene list
     target_normalized_counts <- object@gene_expression_mat[object@genes_list[[each_celltype]], , drop = F]
     
@@ -630,6 +630,7 @@ Testing_interaction_all <- function(object, kernel_mat = NULL,
     
     ## Construct the combination pairs
     gene_names <- rownames(target_normalized_counts)
+    message(paste0("Length of gene_names: ", length(gene_names)))
     combinations <- expand.grid(each_celltype, gene_names, stringsAsFactors = F)
     
     ## Run different algorithms based on the approximation
@@ -646,6 +647,20 @@ Testing_interaction_all <- function(object, kernel_mat = NULL,
           )
         }, mc.cores = num_cores
       )
+      message(paste0("Length of pvalue_res: ", length(pvalues_results)))
+      pvalues_results <- as.data.frame(do.call(rbind, pvalues_results))
+      rownames(pvalues_results) <- gene_names
+      object@result[[each_celltype]] <- pvalues_results
+      rm(pvalues_results)
+    } else {
+      ## Run the alternative 1 kernel approximation algorithm
+      ## Run the Testing_interaction paralleled for each pair
+      ## Add in the covariates version
+      pvalues_results <- pbmcapply::pbmclapply(1:nrow(combinations), 
+                                               function(i) {Testing_interaction(target_normalized_counts[combinations[i, 2], ],
+                                                                                object@celltype_mat[combinations[i, 1], ],
+                                                                                covariates = object@covariates, kernelmat_approx_U = object@kernelmat_approx_U)},  
+                                               mc.cores = num_cores)
       
       pvalues_results <- as.data.frame(do.call(rbind, pvalues_results))
       rownames(pvalues_results) <- gene_names
@@ -655,10 +670,7 @@ Testing_interaction_all <- function(object, kernel_mat = NULL,
     
     message(">>> Finished cell type: ", each_celltype)
     
-  }, error = function(e) {
-    message("!!! Error in cell type: ", each_celltype)
-    message("Error details: ", e$message)
-  })
+  
 }
 
   return(object)
