@@ -648,6 +648,10 @@ Testing_interaction_all <- function(object, kernel_mat = NULL,
         }, mc.cores = num_cores
       )
       message(paste0("Length of pvalue_res: ", length(pvalues_results)))
+      error_gene <- gene_names[which(sapply(pvalues_results, nrow) != 1)]
+      if(length(error_gene > 0){
+        message(paste0("Error genes: ", paste(error_gene, sep = " ")))
+        }
       pvalues_results <- as.data.frame(do.call(rbind, pvalues_results))
       message(paste0("Nrow of df_pvalue_res: ", dim(pvalues_results)[1]))
       rownames(pvalues_results) <- gene_names
