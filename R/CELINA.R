@@ -649,6 +649,7 @@ Testing_interaction_all <- function(object, kernel_mat = NULL,
       )
       message(paste0("Length of pvalue_res: ", length(pvalues_results)))
       pvalues_results <- as.data.frame(do.call(rbind, pvalues_results))
+      message(paste0("Nrow of df_pvalue_res: ", dim(pvalues_results)[1]))
       rownames(pvalues_results) <- gene_names
       object@result[[each_celltype]] <- pvalues_results
       rm(pvalues_results)
