@@ -656,44 +656,43 @@ Testing_interaction_all <- function(object, kernel_mat = NULL,
       message(toString(table(error_test)))
       # ============HERE ARE CHECKING PARTS=========
       # 1) The main class of each element (take the first class)
-cls <- sapply(pvalues_results, function(x) {
-  if (is.null(x)) return("NULL")
-  cl <- class(x)
-  if (length(cl) == 0) return("unknown")
-  cl[1]
-})
-print(table(cls))
-
-# 2) Which elements are not data.frame/matrix
-bad_idx_class <- which(!(cls %in% c("data.frame", "matrix")))
-if (length(bad_idx_class)) {
-  message("Indices with non-data classes: ", paste(bad_idx_class, collapse = ", "))
-  print(data.frame(idx = bad_idx_class, gene = gene_names[bad_idx_class], class = cls[bad_idx_class], stringsAsFactors = FALSE))
-}
-
-# 3) Statistics of the number of rows/columns (NA indicates unable to measure)
-nrows <- sapply(pvalues_results, function(x) {
-  if (is.null(x)) return(NA_integer_)
-  if (inherits(x, "data.frame") || is.matrix(x)) return(nrow(x))
-  return(NA_integer_)
-})
-ncols <- sapply(pvalues_results, function(x) {
-  if (is.null(x)) return(NA_integer_)
-  if (inherits(x, "data.frame") || is.matrix(x)) return(ncol(x))
-  if (is.atomic(x)) return(length(x))
-  return(NA_integer_)
-})
-print(table(nrows, useNA = "ifany"))
-print(table(ncols, useNA = "ifany"))
-
-# 4) Which elements have a number of rows != 1 (should all be 1)
-bad_idx_rows <- which(is.na(nrows) | (nrows != 1))
-if (length(bad_idx_rows) > 0) {
-  message("Indices with nrow != 1 or NA: ", paste(bad_idx_rows, collapse = ", "))
-  print(data.frame(idx = bad_idx_rows, gene = gene_names[bad_idx_rows], class = cls[bad_idx_rows], nrows = nrows[bad_idx_rows], ncols = ncols[bad_idx_rows], stringsAsFactors = FALSE))
-}
- 
-                           
+      cls <- sapply(pvalues_results, function(x) {
+        if (is.null(x)) return("NULL")
+        cl <- class(x)
+        if (length(cl) == 0) return("unknown")
+        cl[1]
+      })
+      print(table(cls))
+      
+      # 2) Which elements are not data.frame/matrix
+      bad_idx_class <- which(!(cls %in% c("data.frame", "matrix")))
+      if (length(bad_idx_class)) {
+        message("Indices with non-data classes: ", paste(bad_idx_class, collapse = ", "))
+        print(data.frame(idx = bad_idx_class, gene = gene_names[bad_idx_class], class = cls[bad_idx_class], stringsAsFactors = FALSE))
+      }
+      
+      # 3) Statistics of the number of rows/columns (NA indicates unable to measure)
+      nrows <- sapply(pvalues_results, function(x) {
+        if (is.null(x)) return(NA_integer_)
+        if (inherits(x, "data.frame") || is.matrix(x)) return(nrow(x))
+        return(NA_integer_)
+      })
+      ncols <- sapply(pvalues_results, function(x) {
+        if (is.null(x)) return(NA_integer_)
+        if (inherits(x, "data.frame") || is.matrix(x)) return(ncol(x))
+        if (is.atomic(x)) return(length(x))
+        return(NA_integer_)
+      })
+      print(table(nrows, useNA = "ifany"))
+      print(table(ncols, useNA = "ifany"))
+      
+      # 4) Which elements have a number of rows != 1 (should all be 1)
+      bad_idx_rows <- which(is.na(nrows) | (nrows != 1))
+      if (length(bad_idx_rows) > 0) {
+        message("Indices with nrow != 1 or NA: ", paste(bad_idx_rows, collapse = ", "))
+        print(data.frame(idx = bad_idx_rows, gene = gene_names[bad_idx_rows], class = cls[bad_idx_rows], nrows = nrows[bad_idx_rows], ncols = ncols[bad_idx_rows], stringsAsFactors = FALSE))
+      }
+      #================= END ===================                          
                            
       pvalues_results <- as.data.frame(do.call(rbind, pvalues_results))
       message(paste0("Nrow of df_pvalue_res: ", dim(pvalues_results)[1]))
